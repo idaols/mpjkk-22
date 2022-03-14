@@ -7,6 +7,17 @@
   pointer-events: none;
 }
 
+table {
+  width: 50rem;
+  margin: auto;
+  border-spacing: 0;
+}
+
+td {
+  padding: 1rem;
+  border-bottom: 1px solid rgb(180, 180, 180);
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .App-logo {
     animation: App-logo-spin infinite 20s linear;
