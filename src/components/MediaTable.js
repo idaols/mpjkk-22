@@ -5,8 +5,8 @@ const MediaTable = ({mediaArray}) => {
   return (
     <table>
       <tbody>
-        {mediaArray.map((item) => {
-          <MediaRow file={item} />;
+        {mediaArray.map((item, index) => {
+          return <MediaRow key={index} file={item} />;
         })}
       </tbody>
     </table>
