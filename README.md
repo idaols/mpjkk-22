@@ -9,7 +9,7 @@ In the project directory, you can run:
 ### `npm start`
 
 Runs the app in the development mode.\
-Open [https://users.metropolia.fi/~idaols/jakso4/viikko1/react/](https://users.metropolia.fi/~idaols/jakso4/viikko1/react/) to view it in your browser.
+Open [https://users.metropolia.fi/~idaols/jakso4/viikko1/first-app/](https://users.metropolia.fi/~idaols/jakso4/viikko1/first-app/) to view it in your browser.
 
 The page will reload when you make changes.\
 You may also see any lint errors in the console.
