@@ -3,8 +3,11 @@ import PropTypes from 'prop-types';
 import {useNavigate} from 'react-router-dom';
 import {useLogin} from '../hooks/ApiHooks';
 import useForm from '../hooks/FormHooks';
+import {useContext} from 'react';
+import {MediaContext} from '../contexts/MediaContext';
 
 const LoginForm = (props) => {
+  const [user, setUser] = useContext(MediaContext);
   const alkuarvot = {
     username: '',
     password: '',
@@ -17,8 +20,9 @@ const LoginForm = (props) => {
     console.log('doLogin');
     try {
       const userData = await postLogin(inputs);
-      console.log(userData);
       localStorage.setItem('token', userData.token);
+      setUser(userData.user);
+      console.log(user);
       navigate('/home');
     } catch (err) {
       alert(err.message);
