@@ -1,6 +1,11 @@
-import React from 'react';
-import useForm from '../hooks/FormHooks';
+// eslint-disable-next-line no-unused-vars
+import PropTypes from 'prop-types';
 import {useUser} from '../hooks/ApiHooks';
+import useForm from '../hooks/FormHooks';
+import {Grid} from '@mui/material';
+import {Typography} from '@mui/material';
+import {TextField} from '@mui/material';
+import {Button} from '@mui/material';
 
 const RegisterForm = (props) => {
   const alkuarvot = {
@@ -32,35 +37,55 @@ const RegisterForm = (props) => {
   console.log(inputs);
 
   return (
-    <form onSubmit={handleSubmit}>
-      <input
-        placeholder="username"
-        name="username"
-        onChange={handleInputChange}
-        value={inputs.username}
-      />
-      <input
-        placeholder="password"
-        name="password"
-        type="password"
-        onChange={handleInputChange}
-        value={inputs.password}
-      />
-      <input
-        placeholder="email"
-        name="email"
-        type="email"
-        onChange={handleInputChange}
-        value={inputs.email}
-      />
-      <input
-        placeholder="full name"
-        name="full_name"
-        onChange={handleInputChange}
-        value={inputs.full_name}
-      />
-      <input type="submit" value="register" />
-    </form>
+    <Grid container>
+      <Grid item xs={12}>
+        <Typography component="h1" variant="h2" gutterBottom>
+          Register
+        </Typography>
+      </Grid>
+
+      <Grid item xs={12}>
+        <form onSubmit={handleSubmit}>
+          <TextField
+            fullWidth
+            placeholder="username"
+            label="username"
+            name="username"
+            onChange={handleInputChange}
+            value={inputs.username}
+          />
+          <TextField
+            fullWidth
+            label="password"
+            placeholder="password"
+            name="password"
+            type="password"
+            onChange={handleInputChange}
+            value={inputs.password}
+          />
+          <TextField
+            fullWidth
+            label="email"
+            placeholder="email"
+            name="email"
+            type="email"
+            onChange={handleInputChange}
+            value={inputs.email}
+          />
+          <TextField
+            fullWidth
+            label="full name"
+            placeholder="full name"
+            name="full_name"
+            onChange={handleInputChange}
+            value={inputs.full_name}
+          />
+          <Button fullWidth color="primary" type="submit" variant="contained">
+            Login
+          </Button>
+        </form>
+      </Grid>
+    </Grid>
   );
 };
 
