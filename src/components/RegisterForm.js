@@ -4,15 +4,35 @@ import {useUser} from '../hooks/ApiHooks';
 import useForm from '../hooks/FormHooks';
 import {Grid} from '@mui/material';
 import {Typography} from '@mui/material';
-import {TextField} from '@mui/material';
 import {Button} from '@mui/material';
+import {ValidatorForm, TextValidator} from 'react-material-ui-form-validator';
+import {useEffect} from 'react';
 
 const RegisterForm = (props) => {
   const alkuarvot = {
     username: '',
     password: '',
+    confirm: '',
     email: '',
     full_name: '',
+  };
+
+  const validators = {
+    username: ['required', 'minStringLength: 3', 'isAvailable'],
+    password: ['required', 'minStringLength: 5'],
+    confirm: ['required', 'isPasswordMatch'],
+    email: ['required', 'isEmail'],
+  };
+
+  const errorMessages = {
+    username: [
+      'required field',
+      'minimum 3 characters',
+      'username not available',
+    ],
+    password: ['required field', 'minimum 5 characters'],
+    confirm: ['required field', 'password missmatch'],
+    email: ['required field', 'email is not valid'],
   };
 
   const {postUser, getUsername} = useUser();
@@ -22,6 +42,7 @@ const RegisterForm = (props) => {
     try {
       const checkUser = await getUsername(inputs.username);
       if (checkUser) {
+        delete inputs.confirm;
         const userData = await postUser(inputs);
         console.log(userData);
       }
@@ -34,7 +55,30 @@ const RegisterForm = (props) => {
     doRegister,
     alkuarvot
   );
-  console.log(inputs);
+
+  useEffect(() => {
+    ValidatorForm.addValidationRule('isAvailable', async (value) => {
+      try {
+        return await getUsername(value);
+      } catch (err) {
+        return true;
+      }
+    });
+
+    ValidatorForm.addValidationRule('isPasswordMatch', (value) => {
+      // sama if lausetta käyttämällä, alla lyhyemmin
+      // if (value !== inputs.password) {
+      //   return false;
+      // }
+      // return true;
+
+      return value === inputs.password ? true : false;
+    });
+
+    return () => {
+      ValidatorForm.removeValidationRule('isAvailable');
+    };
+  }, [inputs]);
 
   return (
     <Grid container>
@@ -45,16 +89,18 @@ const RegisterForm = (props) => {
       </Grid>
 
       <Grid item xs={12}>
-        <form onSubmit={handleSubmit}>
-          <TextField
+        <ValidatorForm onSubmit={handleSubmit}>
+          <TextValidator
             fullWidth
             placeholder="username"
             label="username"
             name="username"
             onChange={handleInputChange}
             value={inputs.username}
+            validators={validators.username}
+            errorMessages={errorMessages.username}
           />
-          <TextField
+          <TextValidator
             fullWidth
             label="password"
             placeholder="password"
@@ -62,8 +108,21 @@ const RegisterForm = (props) => {
             type="password"
             onChange={handleInputChange}
             value={inputs.password}
+            validators={validators.password}
+            errorMessages={errorMessages.password}
           />
-          <TextField
+          <TextValidator
+            fullWidth
+            label="repeat password"
+            placeholder="repeat password"
+            name="confirm"
+            type="password"
+            onChange={handleInputChange}
+            value={inputs.confirm}
+            validators={validators.confirm}
+            errorMessages={errorMessages.confirm}
+          />
+          <TextValidator
             fullWidth
             label="email"
             placeholder="email"
@@ -71,8 +130,10 @@ const RegisterForm = (props) => {
             type="email"
             onChange={handleInputChange}
             value={inputs.email}
+            validators={validators.email}
+            errorMessages={errorMessages.email}
           />
-          <TextField
+          <TextValidator
             fullWidth
             label="full name"
             placeholder="full name"
@@ -81,9 +142,9 @@ const RegisterForm = (props) => {
             value={inputs.full_name}
           />
           <Button fullWidth color="primary" type="submit" variant="contained">
-            Login
+            Register
           </Button>
-        </form>
+        </ValidatorForm>
       </Grid>
     </Grid>
   );
