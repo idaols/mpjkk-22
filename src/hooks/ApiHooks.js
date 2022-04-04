@@ -1,4 +1,3 @@
-// TODO: add necessary imports
 import {useEffect, useState} from 'react';
 import {baseUrl} from '../utils/variables';
 
@@ -19,6 +18,7 @@ const fetchJson = async (url, options = {}) => {
 
 const useMedia = () => {
   const [mediaArray, setMediaArray] = useState([]);
+  const [loading, setLoading] = useState(false);
   const getMedia = async () => {
     try {
       const media = await fetchJson(baseUrl + 'media');
@@ -29,14 +29,31 @@ const useMedia = () => {
       );
       setMediaArray(allFiles);
     } catch (err) {
-      console.log(err.message);
+      alert(err.message);
     }
   };
 
   useEffect(() => {
     getMedia();
   }, []);
-  return {mediaArray};
+
+  const postMedia = async (formdata, token) => {
+    try {
+      setLoading(true);
+      const fetchOptions = {
+        method: 'POST',
+        headers: {
+          'x-access-token': token,
+        },
+        body: formdata,
+      };
+      return await fetchJson(baseUrl + 'media', fetchOptions);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return {mediaArray, postMedia, loading};
 };
 
 const useUser = () => {
@@ -64,6 +81,7 @@ const useUser = () => {
     };
     return await fetchJson(baseUrl + 'users', fetchOptions);
   };
+
   return {getUser, postUser, getUsername};
 };
 
@@ -84,7 +102,7 @@ const useLogin = () => {
 const useTag = () => {
   const getTag = async (tag) => {
     const tagResult = await fetchJson(baseUrl + 'tags/' + tag);
-    if (tagResult.lenght > 0) {
+    if (tagResult.length > 0) {
       return tagResult;
     } else {
       throw new Error('No results');
@@ -93,4 +111,4 @@ const useTag = () => {
   return {getTag};
 };
 
-export {useMedia, useUser, useLogin, useTag};
+export {useMedia, useLogin, useUser, useTag};
