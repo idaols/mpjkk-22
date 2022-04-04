@@ -8,7 +8,7 @@ import {Button} from '@mui/material';
 import {ValidatorForm, TextValidator} from 'react-material-ui-form-validator';
 import {useEffect} from 'react';
 
-const RegisterForm = (props) => {
+const RegisterForm = ({setToggle}) => {
   const alkuarvot = {
     username: '',
     password: '',
@@ -22,6 +22,7 @@ const RegisterForm = (props) => {
     password: ['required', 'minStringLength: 5'],
     confirm: ['required', 'isPasswordMatch'],
     email: ['required', 'isEmail'],
+    full_name: ['minStringLength: 2'],
   };
 
   const errorMessages = {
@@ -33,6 +34,7 @@ const RegisterForm = (props) => {
     password: ['required field', 'minimum 5 characters'],
     confirm: ['required field', 'password missmatch'],
     email: ['required field', 'email is not valid'],
+    full_name: ['minimum 2 characters'],
   };
 
   const {postUser, getUsername} = useUser();
@@ -40,12 +42,10 @@ const RegisterForm = (props) => {
   const doRegister = async () => {
     console.log('doRegister');
     try {
-      const checkUser = await getUsername(inputs.username);
-      if (checkUser) {
-        delete inputs.confirm;
-        const userData = await postUser(inputs);
-        console.log(userData);
-      }
+      delete inputs.confirm;
+      const userData = await postUser(inputs);
+      userData && setToggle(true);
+      console.log(userData);
     } catch (err) {
       alert(err.message);
     }
@@ -140,6 +140,8 @@ const RegisterForm = (props) => {
             name="full_name"
             onChange={handleInputChange}
             value={inputs.full_name}
+            validators={validators.full_name}
+            errorMessages={errorMessages.full_name}
           />
           <Button fullWidth color="primary" type="submit" variant="contained">
             Register
@@ -150,6 +152,8 @@ const RegisterForm = (props) => {
   );
 };
 
-RegisterForm.propTypes = {};
+RegisterForm.propTypes = {
+  setToggle: PropTypes.func,
+};
 
 export default RegisterForm;
