@@ -9,7 +9,9 @@ const useForm = (callback, initState) => {
     callback();
   };
   const handleInputChange = (event) => {
-    event.persist();
+    // if-lause lyhennettynä
+    event.persist && event.persist();
+
     setInputs((inputs) => ({
       ...inputs,
       [event.target.name]: event.target.files

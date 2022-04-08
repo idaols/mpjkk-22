@@ -10,11 +10,21 @@ import {
   ListItemAvatar,
   Avatar,
 } from '@mui/material';
+import {safeParseJson} from '../utils/functions';
 
 const Single = () => {
   const location = useLocation();
   console.log(location);
   const file = location.state.file; // TODO in the next task: single media from props.location.state
+  const {description, filters} = safeParseJson(file.description) || {
+    description: file.description,
+    filters: {
+      brightness: 100,
+      contrast: 100,
+      saturation: 100,
+      sepia: 0,
+    },
+  };
 
   return (
     <>
@@ -26,10 +36,17 @@ const Single = () => {
           component="img"
           image={mediaUrl + file.filename}
           alt={file.title}
-          sx={{height: '60vh'}}
+          sx={{
+            height: '60vh',
+            filter: `
+          brightness(${filters.brightness}%)
+          contrast(${filters.contrast}%)
+          saturate(${filters.saturation}%)
+          sepia(${filters.sepia}%)`,
+          }}
         />
         <CardContent>
-          <Typography>{file.description}</Typography>
+          <Typography>{description}</Typography>
           <List>
             <ListItem>
               <ListItemAvatar>
