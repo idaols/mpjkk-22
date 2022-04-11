@@ -1,5 +1,6 @@
-import {useEffect, useState} from 'react';
+import {useEffect, useState, useContext} from 'react';
 import {baseUrl, appID} from '../utils/variables';
+import {MediaContext} from '../contexts/MediaContext';
 
 const fetchJson = async (url, options = {}) => {
   try {
@@ -16,18 +17,24 @@ const fetchJson = async (url, options = {}) => {
   }
 };
 
-const useMedia = () => {
+const useMedia = (showAllFiles, userId) => {
+  const {update} = useContext(MediaContext);
   const [mediaArray, setMediaArray] = useState([]);
   const [loading, setLoading] = useState(false);
   const getMedia = async () => {
     try {
       setLoading(true);
-      const media = await useTag().getTag(appID);
+      let media = await useTag().getTag(appID);
+      // jos !showAllFiles, filteröi kirjautuneen käyttäjän tiedostot mediataulukkoon
+      if (!showAllFiles) {
+        media = media.filter((file) => file.user_id === userId);
+      }
       const allFiles = await Promise.all(
         media.map(async (file) => {
           return await fetchJson(`${baseUrl}media/${file.file_id}`);
         })
       );
+
       setMediaArray(allFiles);
     } catch (err) {
       alert(err.message);
@@ -38,7 +45,7 @@ const useMedia = () => {
 
   useEffect(() => {
     getMedia();
-  }, []);
+  }, [userId, update]);
 
   const postMedia = async (formdata, token) => {
     try {
@@ -56,7 +63,17 @@ const useMedia = () => {
     }
   };
 
-  return {mediaArray, postMedia, loading};
+  const deleteMedia = async (fileId, token) => {
+    const fetchOptions = {
+      method: 'DELETE',
+      headers: {
+        'x-access-token': token,
+      },
+    };
+    return await fetchJson(baseUrl + 'media/' + fileId, fetchOptions);
+  };
+
+  return {mediaArray, postMedia, deleteMedia, loading};
 };
 
 const useUser = () => {
@@ -74,6 +91,15 @@ const useUser = () => {
     return checkUser.available;
   };
 
+  const getUserById = async (userId, token) => {
+    const fetchOptions = {
+      headers: {
+        'x-access-token': token,
+      },
+    };
+    return await fetchJson(baseUrl + 'users/' + userId, fetchOptions);
+  };
+
   const postUser = async (inputs) => {
     const fetchOptions = {
       method: 'POST',
@@ -85,7 +111,7 @@ const useUser = () => {
     return await fetchJson(baseUrl + 'users', fetchOptions);
   };
 
-  return {getUser, postUser, getUsername};
+  return {getUser, postUser, getUsername, getUserById};
 };
 
 const useLogin = () => {

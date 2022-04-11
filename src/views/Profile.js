@@ -16,7 +16,7 @@ import {
 import {AccountCircle, Badge, ContactMail} from '@mui/icons-material';
 
 const Profile = () => {
-  const [user] = useContext(MediaContext);
+  const {user} = useContext(MediaContext);
   const [avatar, setAvatar] = useState({
     filename: 'https://placekitten.com/320',
   });
@@ -31,9 +31,12 @@ const Profile = () => {
     }
   };
 
-  useEffect(() => {
-    fetchAvatar();
-  }, [user]);
+  useEffect(
+    () => {
+      fetchAvatar();
+    },
+    {user}
+  );
 
   return (
     <>
