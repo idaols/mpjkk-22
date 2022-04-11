@@ -1,23 +1,23 @@
 import {
   Button,
-  Grid,
-  Typography,
   CircularProgress,
+  Grid,
   Slider,
+  Typography,
 } from '@mui/material';
-import {ValidatorForm, TextValidator} from 'react-material-ui-form-validator';
-// import {useNavigate} from 'react-router-dom';
-import useForm from '../hooks/FormHooks';
 import {useMedia, useTag} from '../hooks/ApiHooks';
 import {useNavigate} from 'react-router-dom';
+import useForm from '../hooks/FormHooks';
 import {useState, useEffect} from 'react';
 import {appID} from '../utils/variables';
+import {ValidatorForm, TextValidator} from 'react-material-ui-form-validator';
 
 const Upload = () => {
   const [preview, setPreview] = useState('logo192.png');
   const alkuarvot = {
     title: '',
     description: '',
+    file: null,
   };
 
   const filterarvot = {
@@ -27,6 +27,16 @@ const Upload = () => {
     sepia: 0,
   };
 
+  const validators = {
+    title: ['required', 'minStringLength: 3'],
+    description: ['minStringLength: 5'],
+  };
+
+  const errorMessages = {
+    username: ['required field', 'minimum 3 characters'],
+    description: ['minimum 5 characters'],
+  };
+
   const {postMedia, loading} = useMedia();
   const {postTag} = useTag();
   const navigate = useNavigate();
@@ -34,7 +44,7 @@ const Upload = () => {
   const doUpload = async () => {
     try {
       console.log('doUpload');
-      // lisätään filttert descriptioniin
+      // lisätään filtterit descriptioniin
       const desc = {
         description: inputs.description,
         filters: filterInputs,
@@ -46,7 +56,10 @@ const Upload = () => {
       formdata.append('file', inputs.file);
       const mediaData = await postMedia(formdata, token);
       const tagData = await postTag(
-        {file_id: mediaData.file_id, tag: appID},
+        {
+          file_id: mediaData.file_id,
+          tag: appID,
+        },
         token
       );
       confirm(tagData.message) && navigate('/home');
@@ -94,6 +107,8 @@ const Upload = () => {
               name="title"
               onChange={handleInputChange}
               value={inputs.title}
+              validators={validators.title}
+              errorMessages={errorMessages.title}
             />
             <TextValidator
               fullWidth
@@ -101,6 +116,8 @@ const Upload = () => {
               name="description"
               onChange={handleInputChange}
               value={inputs.description}
+              validators={validators.description}
+              errorMessages={errorMessages.description}
             />
 
             <TextValidator
@@ -110,6 +127,7 @@ const Upload = () => {
               accept="image/*, video/*, audio/*"
               onChange={handleInputChange}
             />
+
             {loading ? (
               <CircularProgress />
             ) : (
@@ -118,6 +136,7 @@ const Upload = () => {
                 color="primary"
                 type="submit"
                 variant="contained"
+                disabled={!inputs.file}
               >
                 Upload
               </Button>
@@ -125,63 +144,75 @@ const Upload = () => {
           </ValidatorForm>
         </Grid>
       </Grid>
-      <Grid container direction="column" alignItems="center" justify="center">
-        <Grid item xs={3}>
-          <img
-            style={{
-              width: '100%',
-              height: '50vh',
-              filter: `
+      {inputs.file && (
+        <Grid container>
+          <Grid item xs={12}>
+            <img
+              style={{
+                width: '100%',
+                filter: `
               brightness(${filterInputs.brightness}%)
               contrast(${filterInputs.contrast}%)
               saturate(${filterInputs.saturation}%)
-              sepia(${filterInputs.sepia}%)`,
-            }}
-            src={preview}
-            alt="preview"
-          />
-        </Grid>
-        <Grid container>
-          <Grid item xs={12}>
-            <Slider
-              name="brightness"
-              min={0}
-              max={200}
-              step={1}
-              valueLabelDisplay="on"
-              onChange={handleSliderChange}
-              defaultValue={filterarvot.brightness}
-            />
-            <Slider
-              name="contrast"
-              min={0}
-              max={200}
-              step={1}
-              valueLabelDisplay="on"
-              onChange={handleSliderChange}
-              defaultValue={filterarvot.contrast}
-            />
-            <Slider
-              name="saturation"
-              min={0}
-              max={200}
-              step={1}
-              valueLabelDisplay="on"
-              onChange={handleSliderChange}
-              defaultValue={filterarvot.saturation}
-            />
-            <Slider
-              name="sepia"
-              min={0}
-              max={100}
-              step={1}
-              valueLabelDisplay="on"
-              onChange={handleSliderChange}
-              defaultValue={filterarvot.sepia}
+              sepia(${filterInputs.sepia}%)
+              `,
+              }}
+              src={preview}
+              alt="preview"
             />
           </Grid>
+          <Grid container>
+            <Grid item xs={12}>
+              <Typography>Brightness</Typography>
+              <Slider
+                name="brightness"
+                min={0}
+                max={200}
+                step={1}
+                valueLabelDisplay="on"
+                onChange={handleSliderChange}
+                value={filterInputs.brightness}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <Typography>Contrast</Typography>
+              <Slider
+                name="contrast"
+                min={0}
+                max={200}
+                step={1}
+                valueLabelDisplay="on"
+                onChange={handleSliderChange}
+                value={filterInputs.contrast}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <Typography>Saturation</Typography>
+              <Slider
+                name="saturation"
+                min={0}
+                max={200}
+                step={1}
+                valueLabelDisplay="on"
+                onChange={handleSliderChange}
+                value={filterInputs.saturation}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <Typography>Sepia</Typography>
+              <Slider
+                name="sepia"
+                min={0}
+                max={100}
+                step={1}
+                valueLabelDisplay="on"
+                onChange={handleSliderChange}
+                value={filterInputs.sepia}
+              />
+            </Grid>
+          </Grid>
         </Grid>
-      </Grid>
+      )}
     </>
   );
 };
