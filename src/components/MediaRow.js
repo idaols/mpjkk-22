@@ -2,13 +2,14 @@ import {Button, ImageListItem, ImageListItemBar} from '@mui/material';
 import PropTypes from 'prop-types';
 import {useContext} from 'react';
 import {MediaContext} from '../contexts/MediaContext';
-// import {Link} from 'react-router-dom';
+import {Link} from 'react-router-dom';
 import {mediaUrl} from '../utils/variables';
+import {safeParseJson} from '../utils/functions';
 
 const MediaRow = ({file, userId, deleteMedia}) => {
   const {update, setUpdate} = useContext(MediaContext);
   const doDelete = () => {
-    const ok = confirm('Do you want to delete this?');
+    const ok = confirm('Do juu delte?');
     if (ok) {
       try {
         const deleteInfo = deleteMedia(
@@ -24,24 +25,54 @@ const MediaRow = ({file, userId, deleteMedia}) => {
     }
   };
 
+  const {description, filters} = safeParseJson(file.description) || {
+    description: file.description,
+    filters: {
+      brightness: 100,
+      contrast: 100,
+      saturation: 100,
+      sepia: 0,
+    },
+  };
+
   return (
-    <ImageListItem
-      key={file.file_id}
-      // component={Link}
-      // to={'/single'}
-      state={{file}}
-    >
+    <ImageListItem key={file.file_id} state={{file}} sx={{borderRadius: 10}}>
       <img
         src={file.thumbnails ? mediaUrl + file.thumbnails.w320 : 'logo512.png'}
         alt={file.title}
         loading="lazy"
+        style={{
+          filter: `
+        brightness(${filters.brightness}%)
+        contrast(${filters.contrast}%)
+        saturate(${filters.saturation}%)
+        sepia(${filters.sepia}%)
+        `,
+          borderRadius: 10,
+        }}
       />
       <ImageListItemBar
+        sx={{borderBottomLeftRadius: 10, borderBottomRightRadius: 10}}
         actionIcon={
           <>
+            <Button
+              variant="contained"
+              component={Link}
+              to={'/single'}
+              state={{file}}
+            >
+              View
+            </Button>
             {userId === file.user_id && (
               <>
-                <Button variant="contained">Edit</Button>
+                <Button
+                  variant="contained"
+                  component={Link}
+                  to={'/modify'}
+                  state={{file}}
+                >
+                  Edit
+                </Button>
                 <Button variant="contained" onClick={doDelete}>
                   Delete
                 </Button>
@@ -50,7 +81,7 @@ const MediaRow = ({file, userId, deleteMedia}) => {
           </>
         }
         title={file.title}
-        subtitle={file.description}
+        subtitle={description}
       />
     </ImageListItem>
   );

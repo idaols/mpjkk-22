@@ -14,6 +14,7 @@ import {
   Typography,
 } from '@mui/material';
 import {AccountCircle, Badge, ContactMail} from '@mui/icons-material';
+import BackButton from '../components/BackButton';
 
 const Profile = () => {
   const {user} = useContext(MediaContext);
@@ -40,6 +41,7 @@ const Profile = () => {
 
   return (
     <>
+      <BackButton />
       <Typography component="h1" variant="h2">
         Profile
       </Typography>

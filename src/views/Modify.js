@@ -5,27 +5,33 @@ import {
   Slider,
   Typography,
 } from '@mui/material';
-import {useMedia, useTag} from '../hooks/ApiHooks';
-import {useNavigate} from 'react-router-dom';
+import {useMedia} from '../hooks/ApiHooks';
+import {useNavigate, useLocation} from 'react-router-dom';
 import useForm from '../hooks/FormHooks';
-import {useState, useEffect} from 'react';
-import {appID} from '../utils/variables';
 import {ValidatorForm, TextValidator} from 'react-material-ui-form-validator';
+import {safeParseJson} from '../utils/functions';
+import {mediaUrl} from '../utils/variables';
 import BackButton from '../components/BackButton';
 
-const Upload = () => {
-  const [preview, setPreview] = useState('logo192.png');
-  const alkuarvot = {
-    title: '',
-    description: '',
-    file: null,
+const Modify = () => {
+  const location = useLocation();
+  const file = location.state.file;
+
+  const {description, filters} = safeParseJson(file.description) || {
+    description: file.description,
+    filters: {
+      brightness: 100,
+      contrast: 100,
+      saturation: 100,
+      sepia: 0,
+    },
   };
 
-  const filterarvot = {
-    brightness: 100,
-    contrast: 100,
-    saturation: 100,
-    sepia: 0,
+  console.log(file);
+
+  const alkuarvot = {
+    title: file.title,
+    description: description,
   };
 
   const validators = {
@@ -38,11 +44,10 @@ const Upload = () => {
     description: ['minimum 5 characters'],
   };
 
-  const {postMedia, loading} = useMedia();
-  const {postTag} = useTag();
+  const {putMedia, loading} = useMedia();
   const navigate = useNavigate();
 
-  const doUpload = async () => {
+  const doModify = async () => {
     try {
       console.log('doUpload');
       // lisätään filtterit descriptioniin
@@ -50,44 +55,29 @@ const Upload = () => {
         description: inputs.description,
         filters: filterInputs,
       };
+      // tee sopiva objekti lähetettäväksi
+      const data = {
+        title: inputs.title,
+        description: JSON.stringify(desc),
+      };
+
       const token = localStorage.getItem('token');
-      const formdata = new FormData();
-      formdata.append('title', inputs.title);
-      formdata.append('description', JSON.stringify(desc));
-      formdata.append('file', inputs.file);
-      const mediaData = await postMedia(formdata, token);
-      const tagData = await postTag(
-        {
-          file_id: mediaData.file_id,
-          tag: appID,
-        },
-        token
-      );
-      confirm(tagData.message) && navigate('/home');
+      const mediaData = await putMedia(file.file_id, data, token);
+      confirm(mediaData.message) && navigate(-1);
     } catch (err) {
       alert(err.message);
     }
   };
 
   const {inputs, handleInputChange, handleSubmit} = useForm(
-    doUpload,
+    doModify,
     alkuarvot
   );
 
   const {inputs: filterInputs, handleInputChange: handleSliderChange} = useForm(
     null,
-    filterarvot
+    filters
   );
-
-  useEffect(() => {
-    if (inputs.file) {
-      const reader = new FileReader();
-      reader.addEventListener('load', () => {
-        setPreview(reader.result);
-      });
-      reader.readAsDataURL(inputs.file);
-    }
-  }, [inputs.file]);
 
   console.log(inputs, filterInputs);
 
@@ -97,7 +87,7 @@ const Upload = () => {
         <Grid item xs={12}>
           <BackButton />
           <Typography component="h1" variant="h2" gutterBottom>
-            Upload
+            Modify
           </Typography>
         </Grid>
 
@@ -122,14 +112,6 @@ const Upload = () => {
               errorMessages={errorMessages.description}
             />
 
-            <TextValidator
-              fullWidth
-              type="file"
-              name="file"
-              accept="image/*, video/*, audio/*"
-              onChange={handleInputChange}
-            />
-
             {loading ? (
               <CircularProgress />
             ) : (
@@ -138,15 +120,14 @@ const Upload = () => {
                 color="primary"
                 type="submit"
                 variant="contained"
-                disabled={!inputs.file}
               >
-                Upload
+                Save
               </Button>
             )}
           </ValidatorForm>
         </Grid>
       </Grid>
-      {inputs.file && (
+      {file && (
         <Grid container>
           <Grid item xs={12}>
             <img
@@ -159,7 +140,7 @@ const Upload = () => {
               sepia(${filterInputs.sepia}%)
               `,
               }}
-              src={preview}
+              src={mediaUrl + file.filename}
               alt="preview"
             />
           </Grid>
@@ -219,4 +200,4 @@ const Upload = () => {
   );
 };
 
-export default Upload;
+export default Modify;
