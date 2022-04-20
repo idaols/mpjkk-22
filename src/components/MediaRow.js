@@ -36,7 +36,7 @@ const MediaRow = ({file, userId, deleteMedia}) => {
   };
 
   return (
-    <ImageListItem key={file.file_id} state={{file}} sx={{borderRadius: 10}}>
+    <ImageListItem key={file.file_id} state={{file}}>
       <img
         src={file.thumbnails ? mediaUrl + file.thumbnails.w320 : 'logo512.png'}
         alt={file.title}
